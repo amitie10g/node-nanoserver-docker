@@ -1,13 +1,16 @@
-# Node.js on Nano Server
+# Node.js on Windows Nano Server
+[![Docker Image CI](https://github.com/amitie10g/node-nanoserver-docker/actions/workflows/docker-image.yml/badge.svg)](https://github.com/amitie10g/node-nanoserver-docker/actions/workflows/docker-image.yml)
 
 <p align=center><img src="https://github.com/Amitie10g/node-nanoserver-docker/assets/2096562/d2ac73e9-d71d-47a7-988a-d73358c411cc" alt="Node.js logo" style="text-align:center;margin:auto"></p>
 
-This is an attemp to bring [Node](https://nodejs.org/) on [Windows Nano Server](https://hub.docker.com/_/microsoft-windows-nanoserver) (and optionally [PowerShell](https://hub.docker.com/_/microsoft-powershell) 7.3 on Nano Server) base image. Only the latest versions of Windows (ltsc2022, see below) and the latest minor version of every major version of Node.JS (from 4 to 22) are available. [[Dockerfile](https://github.com/Amitie10g/node-nanoserver-docker/blob/main/Dockerfile)]
+This project brings [Node.js](https://nodejs.org/) (version 4 to 22) on [Microsoft Windows Nano Server](https://hub.docker.com/_/microsoft-windows-nanoserver) ltsc2022 and ltsc2019 (and optionally [PowerShell](https://hub.docker.com/_/microsoft-powershell) 7.3 on Nano Server ltsc2022) base image.
 
 ## Tags
 
 * ``<node version>`` Windows Nano Server ltsc2022 base image
 * ``<node version>-pwsh`` Windows Nano Server ltsc2022 plus PowerShell 7.3 base image
+
+[Full list of tags avilable](https://github.com/amitie10g/node-nanoserver-docker/pkgs/container/node-nanoserver) at both GitHub Container registry and [Docker Hub Container registry](https://hub.docker.com/r/amitie10g/node-nanoserver).
 
 ## Usage
 
@@ -22,12 +25,12 @@ This project is intended to be used as base image for other Node-based projects.
 
 If you need to install system-wide software, you need to set `USER` as `ContainerAdministrator`. Afterward, you need to change it back to `ContinerUser`.
 
-If you want to use it within GitHub Actions, prefer the GitHub Container registry (`ghcr.io`): `ghcr.io/amitie10g/node-nanoserver`
+If you want to use it within GitHub Actions, prefer the GitHub Container registry: `ghcr.io/amitie10g/node-nanoserver`
 
 ## Building
 Containers for this project has been built using [GitHub Actions](https://github.com/features/actions) for automated weekly builds from 4 to 22 under Windows Nano Server ltsc2022 and ltsc2019. GitHub provides runners only for Windows Server 2022 (ltsc2022) and Server 2019 (ltsc2019) and no [hyperv isolation](https://docs.docker.com/engine/reference/commandline/build/#isolation) is supported. If you need other versions of Windows, follow this instructions.
 
-    docker build $TAGS --build-arg NODE_VER=<node version> --build-arg BASE_IMG=<base image> --build-arg CONT_VER=<container version> .
+    docker build -t <tag> --build-arg NODE_VER=<node version> --build-arg BASE_IMG=<base image> --build-arg CONT_VER=<container version> .
 Where,
 
 * ``NODE_VER`` is used to download Node from ``https://nodejs.org/dist/v${NODE_VER}/node-v${NODE_VER}-win-x64.zip``
@@ -37,6 +40,6 @@ Where,
 ## Licensing
 
 * Everything in this repo is released into the Public domain (the Unlicense)
-*  **Node** is licensed under the **[MIT License](https://opensource.org/license/mit/)**.
+* **Node.js** is licensed under the **[MIT License](https://opensource.org/license/mit/)**.
 * **Microsoft Windows container images** usage is subjected to the **[Microsoft EULA](https://learn.microsoft.com/en-us/virtualization/windowscontainers/images-eula)**
-*  **Microsoft PowerShell** is licensed under the **MIT License**.
+* **Microsoft PowerShell** is licensed under the **MIT License**.
