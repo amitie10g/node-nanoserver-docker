@@ -14,7 +14,7 @@ env:
   VERSION_PATTERN: "node-v(\\d+\\.\\d+\\.\\d+)"
   FIRST_VERSION: 4
   LATEST_VERSION: 22
-  NODE_VERSIONS_ELEMENTS: >
+  NODE_VERSIONS_ELEMENTS: >-
     argon
     boron
     carbon
@@ -74,16 +74,22 @@ jobs:
         run: |
           $baseURL        = [System.Environment]::GetEnvironmentVariable("BASE_URL")
           $versionPattern = [System.Environment]::GetEnvironmentVariable("VERSION_PATTERN")
+          
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
             $htmlContent = Invoke-WebRequest -Uri "${using:baseURL}/latest-${_}"
             foreach ($link in $htmlContent.Links.href) {
               if ($link -match $using:versionPattern) {
-                $versionNumber = $Matches[1]
-                cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${versionNumber}-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }}"
-                cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${versionNumber}-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }}"
+                $minorVersion = $Matches[1]
+                try {
+                  cmd /c "docker image inspect ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-ltsc${{ matrix.winver }}" > $nul
+                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }}"
+                  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }}"
+                } catch {
+                  cmd /c "docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} ."
+                }
                 if (${{ strategy.job-index }} -eq 0) {
-                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${versionNumber}-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
-                  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${versionNumber}-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
+                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} ${{ vars.IMAGE_NAME }}:${_}"
+                  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
                 }
                 break
               }
@@ -138,20 +144,27 @@ jobs:
               }
             }
           }
+
       - name: Tag elements
         run: |
           $baseURL        = [System.Environment]::GetEnvironmentVariable("BASE_URL")
           $versionPattern = [System.Environment]::GetEnvironmentVariable("VERSION_PATTERN")
+          
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
             $htmlContent = Invoke-WebRequest -Uri "${using:baseURL}/latest-${_}"
             foreach ($link in $htmlContent.Links.href) {
               if ($link -match $using:versionPattern) {
-                $versionNumber = $Matches[1]
-                cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${versionNumber}-pwsh-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }}"
-                cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${versionNumber}-pwsh-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }}"
+                $minorVersion = $Matches[1]
+                try{
+                  cmd /c "docker image inspect ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh-ltsc${{ matrix.winver }}" > $null
+                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }}"
+                  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }}"
+                } catch {
+                  cmd /c "docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=nanoserver-ltsc${{ matrix.winver }} --build-arg BASE_IMG=powershell ."
+                }
                 if (${{ strategy.job-index }} -eq 0) {
-                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${versionNumber}-pwsh-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh"
-                  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${versionNumber}-pwsh-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh"
+                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh"
+                  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh"
                 }
                 break
               }
