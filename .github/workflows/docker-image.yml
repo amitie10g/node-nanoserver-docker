@@ -88,7 +88,7 @@ jobs:
                   cmd /c "docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} ."
                 }
                 if (${{ strategy.job-index }} -eq 0) {
-                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} ${{ vars.IMAGE_NAME }}:${_}"
+                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
                   cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
                 }
                 break
