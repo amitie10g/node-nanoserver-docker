@@ -22,153 +22,66 @@ env:
     iron
 
 jobs:
-  Build:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+    - name: parse
+      id: set-matrix
+      run: |
+        version1=($(seq ${{ env.FIRST_VERSION }} ${{ env.LATEST_VERSION }}))
+        read -a version2 <<< "${{ env.NODE_VERSIONS_ELEMENTS }}"
+        versions=("${version1[@]}" "${version2[@]}")
+        echo "versions=$(printf '%s\n' "${versions[@]}" | jq -R . | jq -s -c .)" >> $GITHUB_OUTPUT
+    outputs:
+      versions: ${{ steps.set-matrix.outputs.versions }}
+
+  build:
+    needs: prepare
+    runs-on: windows-${{ matrix.windows_version }}
     strategy:
       matrix:
-        winver: ["2022", "2019"]
-    runs-on: windows-${{ matrix.winver }}
+        node_version: ${{fromJson(needs.prepare.outputs.versions)}}
+        windows_version: ["2022", "2019"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build
-        run: |
-          $baseURL        = [System.Environment]::GetEnvironmentVariable("BASE_URL")
-          $versionPattern = [System.Environment]::GetEnvironmentVariable("VERSION_PATTERN")
-          $firstVersion   = [int][System.Environment]::GetEnvironmentVariable("FIRST_VERSION")
-          $latestVersion  = [int][System.Environment]::GetEnvironmentVariable("LATEST_VERSION")
-
-          $firstVersion..$latestVersion | ForEach-Object -Parallel {
-            $htmlContent = Invoke-WebRequest -Uri "${using:baseURL}/latest-v$_.x"
-            foreach ($link in $htmlContent.Links.href) {
-              if ($link -match $using:versionPattern) {
-                $minorVersion = $Matches[1]
-                $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-ltsc${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-ltsc${{ matrix.winver }}"
-                if (${{ strategy.job-index }} -eq 0) {
-                  $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}"
-                  if ($_ -eq $using:latestVersion) {
-                    $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
-                  }
-                }
-                cmd /c "docker build ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=ltsc${{ matrix.winver }} ."
-                break
-              }
-            }
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        repository: 'amitie10g/node-nanoserver-docker'
+    - name: Get version
+      id: get_minor_version
+      run: |
+        $node_version = "${{ matrix.node_version }}" -match "^\d+$" ? "v${{ matrix.node_version }}.x" : "${{ matrix.node_version }}"
+        $htmlContent = Invoke-WebRequest -Uri "${{ env.BASE_URL }}/latest-$node_version"
+        foreach ($link in $htmlContent.Links.href) {
+          if ($link -match "${{ env.VERSION_PATTERN }}") {
+            $MINOR_VERSION=$Matches[1]
+            echo "minor_version=$MINOR_VERSION" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            exit 0
           }
+        }
+        exit 1
 
-      - name: Tag elements
-        run: |
-          $baseURL        = [System.Environment]::GetEnvironmentVariable("BASE_URL")
-          $versionPattern = [System.Environment]::GetEnvironmentVariable("VERSION_PATTERN")
-          
-          [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            $htmlContent = Invoke-WebRequest -Uri "${using:baseURL}/latest-${_}"
-            foreach ($link in $htmlContent.Links.href) {
-              if ($link -match $using:versionPattern) {
-                $minorVersion = $Matches[1]
-                try {
-                  cmd /c "docker image inspect ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-ltsc${{ matrix.winver }}" > $nul
-                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }}"
-                  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }}"
-                } catch {
-                  cmd /c "docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} ."
-                }
-                if (${{ strategy.job-index }} -eq 0) {
-                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
-                  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
-                }
-                break
-              }
-            }
-          }
+    - name: Set tags
+      uses: docker/metadata-action@v5
+      id: meta
+      with:
+        images: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}
+          ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}
+        tags: |
+          ${{ matrix.node_version }}
+          ${{ steps.get_minor_version.outputs.minor_version}}
+          ${{ matrix.windows_version == 2022 && matrix.node_version == 0 && 'latest' || ''}}
 
-      - name: Push
-        run: |
-          @("${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}", "ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}") | ForEach-Object -Parallel {
-            cmd /c "docker push $_ --all-tags"
-          }
-
-  Build_Powershell:
-    strategy:
-      matrix:
-        winver: ["2022"]
-    runs-on: windows-${{ matrix.winver }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Pull dependencies
-        run: docker pull mcr.microsoft.com/powershell:nanoserver-ltsc${{ matrix.winver }}
-      - name: Build
-        run: |
-          $baseURL        = [System.Environment]::GetEnvironmentVariable("BASE_URL")
-          $versionPattern = [System.Environment]::GetEnvironmentVariable("VERSION_PATTERN")
-          $firstVersion   = [int][System.Environment]::GetEnvironmentVariable("FIRST_VERSION")
-          $latestVersion  = [int][System.Environment]::GetEnvironmentVariable("LATEST_VERSION")
-
-          $firstVersion..$latestVersion | ForEach-Object -Parallel {
-            $htmlContent = Invoke-WebRequest -Uri "${using:baseURL}/latest-v$_.x"
-            foreach ($link in $htmlContent.Links.href) {
-              if ($link -match $using:versionPattern) {
-                $minorVersion = $Matches[1]
-                $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh-ltsc${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh-ltsc${{ matrix.winver }}"
-                if (${{ strategy.job-index }} -eq 0 -and $_ -eq $using:latestVersion) {
-                  $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh"
-                }
-                cmd /c "docker build ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=nanoserver-ltsc${{ matrix.winver }} --build-arg BASE_IMG=powershell ."
-                break
-              }
-            }
-          }
-
-      - name: Tag elements
-        run: |
-          $baseURL        = [System.Environment]::GetEnvironmentVariable("BASE_URL")
-          $versionPattern = [System.Environment]::GetEnvironmentVariable("VERSION_PATTERN")
-          
-          [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            $htmlContent = Invoke-WebRequest -Uri "${using:baseURL}/latest-${_}"
-            foreach ($link in $htmlContent.Links.href) {
-              if ($link -match $using:versionPattern) {
-                $minorVersion = $Matches[1]
-                try{
-                  cmd /c "docker image inspect ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh-ltsc${{ matrix.winver }}" > $null
-                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }}"
-                  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }}"
-                } catch {
-                  cmd /c "docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=nanoserver-ltsc${{ matrix.winver }} --build-arg BASE_IMG=powershell ."
-                }
-                if (${{ strategy.job-index }} -eq 0) {
-                  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh"
-                  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-ltsc${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh"
-                }
-                break
-              }
-            }
-          }
-
-      - name: Push
-        run: |
-          @("${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}", "ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}") | ForEach-Object -Parallel {
-            cmd /c "docker push $_ --all-tags"
-          }
+    - name: Build
+      run: |
+        $json = '${{ steps.meta.outputs.json }}' | ConvertFrom-Json
+        $tags = $json.tags
+        $tagList = $tags | ForEach-Object { "-t $_" }
+        $tagString = $tagList -join ' '
+        cmd /c "docker build $tagString --build-arg CONT_VER=ltsc${{ matrix.windows_version }} --build-arg NODE_VER=${{ matrix.node_version }} ."
+         
+    - name: Push
+      run:
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }} --all-tags
+        docker push ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }} --all-tags
