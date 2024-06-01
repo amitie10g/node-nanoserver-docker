@@ -44,12 +44,6 @@ jobs:
         node_version: ${{fromJson(needs.prepare.outputs.versions)}}
         windows_version: ["2022", "2019"]
     steps:
-    - name: Check
-      run: |
-        echo ${{ strategy.job-index }}
-        echo ${{ matrix.node_version }}
-        echo ${{ matrix.windows_version }}
-
     - name: Checkout
       uses: actions/checkout@v4
     - name: Login to Docker Hub
@@ -63,6 +57,7 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Get version
       id: get_minor_version
       run: |
@@ -87,9 +82,9 @@ jobs:
         tags: |
           ${{ matrix.node_version }}-ltsc${{ matrix.windows_version }}
           ${{ steps.get_minor_version.outputs.minor_version }}-ltsc${{ matrix.windows_version }}
-          ${{ matrix.windows_version == 2022 && matrix.node_version || ''}}
+          ${{ strategy.job-index % 2 && matrix.node_version || ''}}
           ${{ matrix.windows_version == 2022 && steps.get_minor_version.outputs.minor_version || ''}}
-          ${{ matrix.windows_version == 2022 && matrix.node_version == env.LATEST_VERSION && 'latest' || ''}}
+          ${{ strategy.job-index == 0 && 'latest' || ''}}
 
     - name: Build
       run: |
