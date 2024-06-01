@@ -91,6 +91,6 @@ jobs:
         cmd /c "docker build $tagString --build-arg CONT_VER=ltsc${{ matrix.windows_version }} --build-arg NODE_VER=${{ matrix.node_version }} ."
          
     - name: Push
-      run:
+      run: |
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }} --all-tags
         docker push ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }} --all-tags
