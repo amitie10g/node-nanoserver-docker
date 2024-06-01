@@ -29,6 +29,7 @@ jobs:
       id: set-matrix
       run: |
         version1=($(seq ${{ env.FIRST_VERSION }} ${{ env.LATEST_VERSION }}))
+        mapfile -t version1 < <(printf '%s\n' "${version1[@]}" | tac)
         read -a version2 <<< "${{ env.NODE_VERSIONS_ELEMENTS }}"
         versions=("${version1[@]}" "${version2[@]}")
         echo "versions=$(printf '%s\n' "${versions[@]}" | jq -R . | jq -s -c .)" >> $GITHUB_OUTPUT
