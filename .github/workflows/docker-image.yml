@@ -44,12 +44,6 @@ jobs:
         node_version: ${{fromJson(needs.prepare.outputs.versions)}}
         windows_version: ["2022", "2019"]
     steps:
-    - name: Check
-      run: |
-        echo ${{ strategy.job-index }}
-        echo ${{ matrix.node_version }}
-        echo ${{ matrix.windows_version }}
-
     - name: Checkout
       uses: actions/checkout@v4
     - name: Login to Docker Hub
@@ -76,7 +70,6 @@ jobs:
           }
         }
         exit 1
-
     - name: Set tags
       uses: docker/metadata-action@v5
       id: meta
@@ -90,7 +83,6 @@ jobs:
           ${{ matrix.windows_version == 2022 && matrix.node_version || ''}}
           ${{ matrix.windows_version == 2022 && steps.get_minor_version.outputs.minor_version || ''}}
           ${{ strategy.job-index == 0 && 'latest' || ''}}
-
     - name: Build
       run: |
         $json = '${{ steps.meta.outputs.json }}' | ConvertFrom-Json
@@ -98,7 +90,6 @@ jobs:
         $tagList = $tags | ForEach-Object { "-t $_" }
         $tagString = $tagList -join ' '
         cmd /c "docker build $tagString --build-arg CONT_VER=ltsc${{ matrix.windows_version }} --build-arg NODE_VER=${{ matrix.node_version }} ."
-         
     - name: Push
       run: |
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }} --all-tags
