@@ -24,6 +24,7 @@ env:
 jobs:
   Build:
     strategy:
+      fail-fast: false
       matrix:
         winver:
           - ltsc2022
@@ -109,6 +110,7 @@ jobs:
 
   Build_Powershell:
     strategy:
+      fail-fast: false
       matrix:
         winver:
           - ltsc2022
