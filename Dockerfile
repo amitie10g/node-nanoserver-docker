@@ -1,14 +1,14 @@
-ARG BASE_IMG=windows/nanoserver
-ARG CONT_VER=ltsc2022
+ARG  BASE_IMG=windows/nanoserver
+ARG  CONT_VER=ltsc2022
 FROM mcr.microsoft.com/${BASE_IMG}:${CONT_VER}
-ARG NODE_VER=22.4.0
+ARG  NODE_VER=22.4.0
+
+COPY /node-v${NODE_VER}-win-x64 C:\\node
 
 USER ContainerAdministrator
-RUN curl.exe https://nodejs.org/dist/v%NODE_VER%/node-v%NODE_VER%-win-x64.zip -o C:\\node.zip & \
-    tar -xf node.zip & del node.zip & \
-    setx /M PATH "%PATH%;C:\\node-v%NODE_VER%-win-x64"
-
+RUN  setx /M PATH "%PATH%;C:\\node"
 USER ContainerUser
+
 WORKDIR C:\\Users\\ContainerUser\\app
 
 ENTRYPOINT ["node"]
