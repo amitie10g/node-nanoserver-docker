@@ -70,10 +70,11 @@ jobs:
                     $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
                   }
                 }
-                echo "curl.exe https://nodejs.org/dist/v${minorVersion}/node-v${minorVersion}-win-x64.zip -o node-v${minorVersion}-win-x64.zip"
-                curl.exe https://nodejs.org/dist/v${minorVersion}/node-v${minorVersion}-win-x64.zip -o node-v${minorVersion}-win-x64.zip
-                tar -xf node-v${minorVersion}-win-x64.zip
-                cmd /c "docker build --isolation hyperv ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=${{ matrix.winver }} ."
+                try {
+                  curl.exe https://nodejs.org/dist/v${minorVersion}/node-v${minorVersion}-win-x64.zip -o node-v${minorVersion}-win-x64.zip
+                  tar -xf node-v${minorVersion}-win-x64.zip
+                  cmd /c "docker build --isolation hyperv ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=${{ matrix.winver }} ."
+                } catch {}
                 break
               }
             }
@@ -157,7 +158,11 @@ jobs:
                 if (${{ strategy.job-index }} -eq 0 -and $_ -eq $using:latestVersion) {
                   $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh"
                 }
-                cmd /c "docker build --isolation hyperv ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=nanoserver-${{ matrix.winver }} --build-arg BASE_IMG=powershell ."
+                try{
+                  curl.exe https://nodejs.org/dist/v${minorVersion}/node-v${minorVersion}-win-x64.zip -o node-v${minorVersion}-win-x64.zip
+                  tar -xf node-v${minorVersion}-win-x64.zip
+                  cmd /c "docker build --isolation hyperv ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=nanoserver-${{ matrix.winver }} --build-arg BASE_IMG=powershell ."
+                } catch{}
                 break
               }
             }
