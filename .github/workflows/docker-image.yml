@@ -69,7 +69,7 @@ jobs:
                     $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
                   }
                 }
-                cmd /c "docker build ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=${{ matrix.winver }} ."
+                cmd /c "docker build --isolation hyperv ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=${{ matrix.winver }} ."
                 break
               }
             }
@@ -90,7 +90,7 @@ jobs:
                   cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
                   cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
                 } catch {
-                  cmd /c "docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} ."
+                  cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} ."
                 }
                 if (${{ strategy.job-index }} -eq 0) {
                   cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
@@ -152,7 +152,7 @@ jobs:
                 if (${{ strategy.job-index }} -eq 0 -and $_ -eq $using:latestVersion) {
                   $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh"
                 }
-                cmd /c "docker build ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=nanoserver-${{ matrix.winver }} --build-arg BASE_IMG=powershell ."
+                cmd /c "docker build --isolation hyperv ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=nanoserver-${{ matrix.winver }} --build-arg BASE_IMG=powershell ."
                 break
               }
             }
@@ -173,7 +173,7 @@ jobs:
                   cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-${{ matrix.winver }}"
                   cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-${{ matrix.winver }}"
                 } catch {
-                  cmd /c "docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=nanoserver-${{ matrix.winver }} --build-arg BASE_IMG=powershell ."
+                  cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=nanoserver-${{ matrix.winver }} --build-arg BASE_IMG=powershell ."
                 }
                 if (${{ strategy.job-index }} -eq 0) {
                   cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh"
