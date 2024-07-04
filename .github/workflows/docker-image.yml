@@ -71,8 +71,8 @@ jobs:
                   }
                 }
                 try {
-                  curl.exe https://nodejs.org/dist/v${minorVersion}/node-v${minorVersion}-win-x64.zip -o node-v${minorVersion}-win-x64.zip || break
-                  tar -xf node-v${minorVersion}-win-x64.zip
+                  Invoke-WebRequest -Uri https://nodejs.org/dist/v${minorVersion}/node-v${minorVersion}-win-x64.zip -OutFile node-v${minorVersion}-win-x64.zip
+                  Expand-Archive -Path .\node-v${minorVersion}-win-x64.zip -DestinationPath .\node-v${minorVersion}-win-x64
                   cmd /c "docker build --isolation hyperv ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=${{ matrix.winver }} ."
                 } catch {
                   Write-Output "node-v${minorVersion}-win-x64.zip is unavailable"
