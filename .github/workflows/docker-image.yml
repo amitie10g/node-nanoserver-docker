@@ -161,10 +161,12 @@ jobs:
                   $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-pwsh -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-pwsh -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-pwsh"
                 }
                 try{
-                  curl.exe https://nodejs.org/dist/v${minorVersion}/node-v${minorVersion}-win-x64.zip -o node-v${minorVersion}-win-x64.zip
-                  tar -xf node-v${minorVersion}-win-x64.zip
+                  Invoke-WebRequest -Uri https://nodejs.org/dist/v${minorVersion}/node-v${minorVersion}-win-x64.zip -OutFile node-v${minorVersion}-win-x64.zip
+                  Expand-Archive -Path .\node-v${minorVersion}-win-x64.zip -DestinationPath .\node-v${minorVersion}-win-x64
                   cmd /c "docker build --isolation hyperv ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=nanoserver-${{ matrix.winver }} --build-arg BASE_IMG=powershell ."
-                } catch{}
+                } catch {
+                  Write-Output "node-v${minorVersion}-win-x64.zip is unavailable"
+                }
                 break
               }
             }
