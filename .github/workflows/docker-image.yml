@@ -95,10 +95,12 @@ jobs:
           $versions | ForEach-Object -Parallel {
             param ($version)
             $major, $minor, $patch = $version -split '\.'
+            echo $version
+            echo $major
             $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$major-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$$version-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }}"
             if (${{ strategy.job-index }} -eq 0) {
               $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${major} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${major} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}"
-              if ($_ -eq $using:latestVersion) {
+              if ($major -eq [System.Environment]::GetEnvironmentVariable("LATEST_VERSION")) {
                 $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
               }
             }
