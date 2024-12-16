@@ -107,11 +107,10 @@ jobs:
 
       - name: Tag elements
         run: |
-          echo [System.Environment]::GetEnvironmentVariable("BASE_URL")
+          $baseURL = [System.Environment]::GetEnvironmentVariable("BASE_URL")
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            param ($baseUrl)
-            echo $_
-          } -ArgumentList [System.Environment]::GetEnvironmentVariable("BASE_URL")
+            echo ${baseURL}/latest-${_}
+          }
 
 #      - name: Push
 #        run: |
