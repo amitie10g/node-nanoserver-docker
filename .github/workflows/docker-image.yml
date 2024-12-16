@@ -111,23 +111,23 @@ jobs:
             $response     = Invoke-WebRequest -Uri "[System.Environment]::GetEnvironmentVariable("BASE_URL")/latest-$_"
             $canonicalUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
             echo $canonicalUrl
-            $minorVersion = Split-Path -Path $canonicalUrl -Leaf
-            try {
-              cmd /c "docker image inspect ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }}" > $nul
-              cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
-              cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
-            } catch {
-              cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} ."
-            }
-            if (${{ strategy.job-index }} -eq 0) {
-              cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
-              cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
-            }
-            break
+            #$minorVersion = Split-Path -Path $canonicalUrl -Leaf
+            #try {
+            #  cmd /c "docker image inspect ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }}" > $nul
+            #  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
+            #  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
+            #} catch {
+            #  cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} ."
+            #}
+            #if (${{ strategy.job-index }} -eq 0) {
+            #  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
+            #  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
+            #}
+            #break
           }
 
-      - name: Push
-        run: |
-          @("${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}", "ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}") | ForEach-Object -Parallel {
-            cmd /c "docker push $_ --all-tags"
-          }
+#      - name: Push
+#        run: |
+#          @("${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}", "ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}") | ForEach-Object -Parallel {
+#            cmd /c "docker push $_ --all-tags"
+#          }
