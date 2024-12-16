@@ -99,7 +99,7 @@ jobs:
               }
             }
             cmd /c "docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${version} --build-arg CONT_VER=${{ matrix.winver }} ."
-          } -ThrottleLimit 5
+          }
       - name: Check1
         run: docker images
 
