@@ -84,6 +84,7 @@ jobs:
 
       - name: Build
         run: |
+          dir
           $directories = Get-ChildItem -Path . -Filter "node-*" -Directory
           $versions = @()
           $regex = [regex]"\d+\.\d+\.\d+"
