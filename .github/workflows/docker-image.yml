@@ -8,7 +8,7 @@ on:
 env:
   BASE_URL: "https://nodejs.org/dist"
   VERSION_PATTERN: "node-v(\\d+\\.\\d+\\.\\d+)"
-  FIRST_VERSION: 4
+  FIRST_VERSION: 6
   LATEST_VERSION: 23
   NODE_VERSIONS_ELEMENTS: >-
     argon
@@ -31,8 +31,7 @@ jobs:
         for version in $(seq ${{ env.FIRST_VERSION }} ${{ env.LATEST_VERSION }}); do
           base_url=$(curl -Ls -o /dev/null -w %{url_effective} "${{ env.BASE_URL }}/latest-v${version}.x")
           minor_version=$(basename "${base_url}")
-          echo ${base_url}/node-v${minor_version}-win-x64.zip
-          curl -O ${base_url}node-${minor_version}-win-x64.zip
+          curl ${base_url}node-${minor_version}-win-x64.zip | unzip - -d "node-${minor_version}"
         done
         ls -l node*
 
