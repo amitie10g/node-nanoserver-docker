@@ -108,6 +108,7 @@ jobs:
           $baseURL = [System.Environment]::GetEnvironmentVariable("BASE_URL")
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
             $baseURL = $($using:baseURL)
+            echo $baseURL
             $url = curl.exe -Ls -o NUL -w "%{url_effective}" ${baseURL}/latest-${_}
             if ($url -match '\b(\d+\.\d+\.\d+)\b') {
               try {
