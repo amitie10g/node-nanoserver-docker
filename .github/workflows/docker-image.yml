@@ -84,8 +84,8 @@ jobs:
 
       - name: Build
         run: |
-          dir
-          $directories = Get-ChildItem -Path . -Filter "node-*" -Directory
+          $directories = Get-ChildItem -Path NodeJS -Directory
+          echo $directories
           $versions = @()
           $regex = [regex]"\d+\.\d+\.\d+"
           foreach ($dir in $directories) {
