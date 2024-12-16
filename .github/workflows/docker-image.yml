@@ -84,27 +84,25 @@ jobs:
 
       - name: Build
         run: |
-          $baseURL        = [System.Environment]::GetEnvironmentVariable("BASE_URL")
-          $versionPattern = [System.Environment]::GetEnvironmentVariable("VERSION_PATTERN")
-          $firstVersion   = [int][System.Environment]::GetEnvironmentVariable("FIRST_VERSION")
-          $latestVersion  = [int][System.Environment]::GetEnvironmentVariable("LATEST_VERSION")
-
-          $firstVersion..$latestVersion | ForEach-Object -Parallel {
-            $response     = Invoke-WebRequest -Uri "${using:baseURL}/latest-v$_.x"
-            $canonicalUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
-            echo $canonicalUrl
-            $minorVersion = Split-Path -Path $canonicalUrl -Leaf
-
-            $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }}"
+          $directories = Get-ChildItem -Path . -Filter "node-*" -Directory
+          $versions = @()
+          $regex = [regex]"\d+\.\d+\.\d+"
+          foreach ($dir in $directories) {
+            if ($dir.Name -match $regex) {
+              $versions += $matches[0]
+            }
+          }
+          $versions | ForEach-Object -Parallel {
+            param ($version)
+            $major, $minor, $patch = $version -split '\.'
+            $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$major-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$$version-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }}"
             if (${{ strategy.job-index }} -eq 0) {
-              $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}"
+              $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${major} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${major} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}"
               if ($_ -eq $using:latestVersion) {
                 $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
               }
             }
-            Invoke-WebRequest -Uri https://nodejs.org/dist/v${minorVersion}/node-v${minorVersion}-win-x64.zip -OutFile node-v${minorVersion}-win-x64.zip
-            Expand-Archive -Path .\node-v${minorVersion}-win-x64.zip -DestinationPath .\node-v${minorVersion}-win-x64
-            cmd /c "docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${minorVersion} --build-arg CONT_VER=${{ matrix.winver }} ."
+            cmd /c "docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${version} --build-arg CONT_VER=${{ matrix.winver }} ."
           }
 
       - name: Tag elements
