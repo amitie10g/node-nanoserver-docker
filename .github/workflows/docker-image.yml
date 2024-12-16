@@ -108,25 +108,9 @@ jobs:
       - name: Tag elements
         run: |
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            param ($version, $baseUrl)
-            echo $version
-            echo $baseUrl
-            #$response     = ${baseUrl}/latest-${version}"
-            #$canonicalUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
-            #echo $canonicalUrl
-            #$minorVersion = Split-Path -Path $canonicalUrl -Leaf
-            #try {
-            #  cmd /c "docker image inspect ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }}" > $nul
-            #  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
-            #  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
-            #} catch {
-            #  cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${minorVersion} ."
-            #}
-            #if (${{ strategy.job-index }} -eq 0) {
-            #  cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
-            #  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
-            #}
-            #break
+              param ($version, $baseUrl)
+              echo $version
+              echo $baseUrl
           } -ArgumentList $_, [System.Environment]::GetEnvironmentVariable("BASE_URL")
 
 #      - name: Push
