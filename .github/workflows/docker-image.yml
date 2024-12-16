@@ -32,7 +32,7 @@ jobs:
           base_url=$(curl -Ls -o /dev/null -w %{url_effective} "${{ env.BASE_URL }}/latest-v${version}.x")
           minor_version=$(basename "${base_url}")
           echo ${base_url}/node-v${minor_version}-win-x64.zip
-          curl -O ${base_url}/node-v${minor_version}-win-x64.zip
+          curl -O ${base_url}node-${minor_version}-win-x64.zip
         done
         ls -l node*
 
