@@ -33,7 +33,7 @@ jobs:
           minor_version=$(basename "${base_url}")
           curl -O ${base_url}node-${minor_version}-win-x64.zip
         done
-        unzip node*.zip
+        unzip *.zip
         ls -l node*
 
   Build:
