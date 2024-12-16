@@ -100,6 +100,8 @@ jobs:
             }
             cmd /c "docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${version} --build-arg CONT_VER=${{ matrix.winver }} ."
           } -ThrottleLimit 3
+      - name: Check1
+        run: docker images
 
       - name: Tag elements
         run: |
@@ -120,6 +122,8 @@ jobs:
               }
             }
           }
+      - name: Check2
+        run: docker images
 
       - name: Push
         run: |
