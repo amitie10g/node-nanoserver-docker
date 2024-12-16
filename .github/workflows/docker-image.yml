@@ -106,7 +106,7 @@ jobs:
               }
             }
             cmd /c "docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${version} --build-arg CONT_VER=${{ matrix.winver }} ."
-          }
+          } -ArgumentList $_
 
       - name: Tag elements
         run: |
