@@ -108,7 +108,7 @@ jobs:
       - name: Tag elements
         run: |
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            $response     = Invoke-WebRequest -Uri "${using:baseURL}/latest-$_"
+            $response     = Invoke-WebRequest -Uri "[System.Environment]::GetEnvironmentVariable("BASE_URL")/latest-$_"
             $canonicalUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
             echo $canonicalUrl
             $minorVersion = Split-Path -Path $canonicalUrl -Leaf
