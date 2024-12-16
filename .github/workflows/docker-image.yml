@@ -102,18 +102,15 @@ jobs:
                 $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
               }
             }
-            echo ${TAGS}
-            cmd /c "docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${version} --build-arg CONT_VER=${{ matrix.winver }} ."
+            cmd /c "echo docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${version} --build-arg CONT_VER=${{ matrix.winver }} ."
           }
 
       - name: Tag elements
         run: |
-          $baseURL        = [System.Environment]::GetEnvironmentVariable("BASE_URL")
-          $versionPattern = [System.Environment]::GetEnvironmentVariable("VERSION_PATTERN")
-          
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            $response     = Invoke-WebRequest -Uri "${using:baseURL}/latest-v$_.x"
+            $response     = Invoke-WebRequest -Uri "${using:baseURL}/latest-$_"
             $canonicalUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
+            echo $canonicalUrl
             $minorVersion = Split-Path -Path $canonicalUrl -Leaf
             try {
               cmd /c "docker image inspect ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }}" > $nul
