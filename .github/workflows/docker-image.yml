@@ -108,7 +108,8 @@ jobs:
       - name: Tag elements
         run: |
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            $response     = Invoke-WebRequest -Uri "[System.Environment]::GetEnvironmentVariable("BASE_URL")/latest-$_"
+            param ($version, $baseUrl)
+            $response     = ${baseUrl}/latest-${version}"
             $canonicalUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
             echo $canonicalUrl
             #$minorVersion = Split-Path -Path $canonicalUrl -Leaf
@@ -124,7 +125,7 @@ jobs:
             #  cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
             #}
             #break
-          }
+          } -ArgumentList $_, [System.Environment]::GetEnvironmentVariable("BASE_URL")
 
 #      - name: Push
 #        run: |
