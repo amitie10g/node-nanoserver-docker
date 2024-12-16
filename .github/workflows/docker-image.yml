@@ -33,7 +33,7 @@ jobs:
           minor_version=$(basename "${base_url}")
           curl -O ${base_url}node-${minor_version}-win-x64.zip
           unzip node-${minor_version}-win-x64.zip
-          mv node-${minor_version}-win-x64/node-${minor_version}-win-x64 node-${minor_version}
+          mv node-${minor_version}-win-x64/ node-${minor_version}
         done
 
     - name: Upload to Artifacts
