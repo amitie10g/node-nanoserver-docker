@@ -31,7 +31,7 @@ jobs:
         for version in $(seq ${{ env.FIRST_VERSION }} ${{ env.LATEST_VERSION }}); do
           base_url=$(curl -Ls -o /dev/null -w %{url_effective} "${{ env.BASE_URL }}/latest-v${version}.x")
           minor_version=$(basename "${base_url}")
-          curl ${base_url}node-${minor_version}-win-x64.zip | unzip - -d "node-${minor_version}"
+          curl ${base_url}node-${minor_version}-win-x64.zip | unzip -
         done
         ls -l node*
 
