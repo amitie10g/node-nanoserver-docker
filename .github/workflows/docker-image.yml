@@ -109,9 +109,11 @@ jobs:
         run: |
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
             param ($version, $baseUrl)
-            $response     = ${baseUrl}/latest-${version}"
-            $canonicalUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
-            echo $canonicalUrl
+            echo $version
+            echo $baseUrl
+            #$response     = ${baseUrl}/latest-${version}"
+            #$canonicalUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
+            #echo $canonicalUrl
             #$minorVersion = Split-Path -Path $canonicalUrl -Leaf
             #try {
             #  cmd /c "docker image inspect ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }}" > $nul
