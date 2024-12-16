@@ -23,6 +23,16 @@ env:
     jod
 
 jobs:
+  Download:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download
+      run: |
+        for version in $(seq ${{ env.FIRST_VERSION }} ${{ env.LATEST_VERSION }}); do
+              url=$(curl -Ls -o /dev/null -w %{url_effective} "${{ env.BASE_URL }}/latest-v${version}.x")
+              echo "URL para v${version}: $url"
+          done
+
   Build:
     strategy:
       fail-fast: false
