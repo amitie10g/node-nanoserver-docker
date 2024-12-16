@@ -85,7 +85,6 @@ jobs:
       - name: Build
         run: |
           $directories = Get-ChildItem -Path NodeJS -Directory
-          echo $directories
           $versions = @()
           $regex = [regex]"\d+\.\d+\.\d+"
           foreach ($dir in $directories) {
@@ -93,6 +92,7 @@ jobs:
               $versions += $matches[0]
             }
           }
+          echo $versions
           $versions | ForEach-Object -Parallel {
             param ($version)
             $major, $minor, $patch = $version -split '\.'
