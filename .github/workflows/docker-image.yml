@@ -95,8 +95,6 @@ jobs:
           $versions | ForEach-Object -Parallel {
             $version = $_
             $major, $minor, $patch = $_ -split '\.'
-            echo $version
-            echo $major
             $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${major}-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${major}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }}"
             if (${{ strategy.job-index }} -eq 0) {
               $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${major} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${major} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}"
@@ -104,6 +102,7 @@ jobs:
                 $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
               }
             }
+            echo ${TAGS}
             cmd /c "docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${version} --build-arg CONT_VER=${{ matrix.winver }} ."
           }
 
