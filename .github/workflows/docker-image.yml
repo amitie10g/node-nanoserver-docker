@@ -109,8 +109,8 @@ jobs:
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
             $baseURL = $($using:baseURL)
             $url = curl.exe -Ls -o NUL -w "%{url_effective}" ${baseURL}/latest-${_}
-            echo $url
             if ($url -match '\b(\d+\.\d+\.\d+)\b') {
+              $matches
               try {
                 cmd /c "echo docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${$matches[1]}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
                 cmd /c "echo docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${$matches[1]}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
