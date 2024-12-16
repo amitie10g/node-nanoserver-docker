@@ -110,7 +110,9 @@ jobs:
           $baseURL = [System.Environment]::GetEnvironmentVariable("BASE_URL")
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
             $baseURL = $($using:baseURL)
-            echo ${baseURL}/latest-${_}
+            $response = Invoke-WebRequest -Uri ${baseURL}/latest-${_} -MaximumRedirection 10
+            $canonicalUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
+            echo $canonicalUrl
           }
 
 #      - name: Push
