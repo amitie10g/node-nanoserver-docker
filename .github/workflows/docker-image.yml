@@ -32,9 +32,16 @@ jobs:
           base_url=$(curl -Ls -o /dev/null -w %{url_effective} "${{ env.BASE_URL }}/latest-v${version}.x")
           minor_version=$(basename "${base_url}")
           curl -O ${base_url}node-${minor_version}-win-x64.zip
-          unzip node-${minor_version}-win-x64.zip
+          unzip node-${minor_version}-win-x64.zip -d node-${minor_version}
         done
-        ls -l node*
+
+    - name: Upload to Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: NodeJS
+        path: |
+          node*
+          !*.zip
 
   Build:
     needs: Download
