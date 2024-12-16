@@ -64,6 +64,7 @@ jobs:
           $firstVersion..$latestVersion | ForEach-Object -Parallel {
             $response     = Invoke-WebRequest -Uri "${using:baseURL}/latest-v$_.x"
             $canonicalUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
+            echo $canonicalUrl
             $minorVersion = Split-Path -Path $canonicalUrl -Leaf
 
             $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${minorVersion}-${{ matrix.winver }}"
