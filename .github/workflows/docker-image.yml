@@ -109,7 +109,7 @@ jobs:
         run: |
           $baseURL = [System.Environment]::GetEnvironmentVariable("BASE_URL")
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            echo ${baseURL}/latest-${_}
+            echo $($using:baseURL)/latest-${_}
           }
 
 #      - name: Push
