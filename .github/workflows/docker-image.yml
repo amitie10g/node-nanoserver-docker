@@ -8,8 +8,7 @@ on:
 env:
   BASE_URL: "https://nodejs.org/dist"
   FIRST_VERSION: 6
-  LAST_VERSION: 23
-  LATEST_VERSION: 22
+  LATEST_VERSION: 23
   NODE_VERSIONS_ELEMENTS: >-
     argon
     boron
