@@ -107,15 +107,14 @@ jobs:
         run: |
           $baseURL = [System.Environment]::GetEnvironmentVariable("BASE_URL")
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            $baseURL = $($using:baseURL)
-            $url = curl.exe -Ls -o NUL -w "%{url_effective}" ${baseURL}/latest-${_}
-            if ($url -match '\b(\d+\.\d+\.\d+)\b') {
-              $matches
+            $url = curl.exe -Ls -o NUL -w "%{url_effective}" $($using:baseURL)/latest-${_}
+            if ($url -match "v(\d+\.\d+\.\d+)") {
+              $version = $matches[1]
               try {
-                cmd /c "echo docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${$matches[1]}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
-                cmd /c "echo docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${$matches[1]}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
+                cmd /c "echo docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
+                cmd /c "echo docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
               } catch {
-                cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${$matches[1]} ."
+                cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${version} ."
               }
               if (${{ strategy.job-index }} -eq 0) {
                 cmd /c "echo docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
