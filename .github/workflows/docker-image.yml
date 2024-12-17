@@ -127,8 +127,6 @@ jobs:
               }
             }
           } -ThrottleLimit 9
-      - name: Check2
-        run: docker images
 
       - name: Push
         run: |
