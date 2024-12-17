@@ -3,12 +3,21 @@
 
 <p align=center><img src="https://github.com/Amitie10g/node-nanoserver-docker/assets/2096562/d2ac73e9-d71d-47a7-988a-d73358c411cc" alt="Node.js logo" style="text-align:center;margin:auto"></p>
 
-This project brings [Node.js](https://nodejs.org/) (version 4 to 22) on [Microsoft Windows Nano Server](https://hub.docker.com/_/microsoft-windows-nanoserver) ltsc2022 and ltsc2019 (and optionally [PowerShell](https://hub.docker.com/_/microsoft-powershell) 7.3 on Nano Server ltsc2022) base image.
+This project brings [Node.js](https://nodejs.org/) (version 6 to 22) on [Microsoft Windows Nano Server](https://hub.docker.com/_/microsoft-windows-nanoserver) base image.
 
 ## Tags
 
-* ``<node version>`` Windows Nano Server ltsc2022 base image
-* ``<node version>-pwsh`` Windows Nano Server ltsc2022 plus PowerShell 7.3 base image
+* ``23`` ``23-ltsc2022``
+* ``latest`` ``jod`` ``jod-ltsc2022``  ``22`` ``22-ltsc2022``
+* ``iron`` ``iron-ltsc2022``  ``20`` ``20-ltsc2022``
+* ``hydrogen`` ``hydrogen-ltsc2022``  ``18`` ``18-ltsc2022``
+* ``gallium`` ``gallium-ltsc2022``  ``16`` ``16-ltsc2022``
+* ``fermium`` ``fermium-ltsc2022``  ``14`` ``14-ltsc2022``
+* ``erbium`` ``erbium-ltsc2022``  ``12`` ``12-ltsc2022``
+* ``dubnium`` ``dubnium-ltsc2022``  ``10`` ``10-ltsc2022``
+* ``carbon`` ``carbon-ltsc2022``  ``8`` ``8-ltsc2022``
+* ``boron`` ``boron-ltsc2022``  ``6`` ``6-ltsc2022``
+* ``argon`` ``argon-ltsc2022``  ``4`` ``4-ltsc2022``
 
 [Full list of tags avilable](https://github.com/amitie10g/node-nanoserver-docker/pkgs/container/node-nanoserver) at both GitHub Container registry and [Docker Hub Container registry](https://hub.docker.com/r/amitie10g/node-nanoserver).
 
