@@ -100,8 +100,6 @@ jobs:
             } 
             cmd /c "docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${version} --build-arg CONT_VER=${{ matrix.winver }} ."
           } -ThrottleLimit 9
-      - name: Check1
-        run: docker images
 
       - name: Tag elements
         run: |
@@ -109,20 +107,17 @@ jobs:
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
             $base_url = $($using:baseURL)
             $url = curl.exe -Ls -o NUL -w "%{url_effective}" ${base_url}/latest-${_}
-            echo $url
             if ($url -match "v(\d+\.\d+\.\d+)") {
-              echo $matches
               $version = $matches[1]
-              echo $version
               try {
-                cmd /c "echo docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
-                cmd /c "echo docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
+                cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
+                cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
               } catch {
                 cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${version} ."
               }
               if (${{ strategy.job-index }} -eq 0) {
-                cmd /c "echo docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
-                cmd /c "echo docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
+                cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
+                cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
               }
             }
           } -ThrottleLimit 9
