@@ -8,7 +8,8 @@ on:
 env:
   BASE_URL: "https://nodejs.org/dist"
   FIRST_VERSION: 6
-  LATEST_VERSION: 23
+  LAST_VERSION: 23
+  LATEST_VERSION: 22
   NODE_VERSIONS_ELEMENTS: >-
     argon
     boron
@@ -27,7 +28,7 @@ jobs:
     steps:
     - name: Download
       run: |
-        for version in $(seq ${{ env.FIRST_VERSION }} ${{ env.LATEST_VERSION }}); do
+        for version in $(seq ${{ env.FIRST_VERSION }} ${{ env.LAST_VERSION }}); do
           {
             base_url=$(curl -Ls -o /dev/null -w %{url_effective} "${{ env.BASE_URL }}/latest-v${version}.x")
             minor_version=$(basename "${base_url}")
