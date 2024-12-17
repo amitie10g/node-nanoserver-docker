@@ -107,9 +107,11 @@ jobs:
         run: |
           $baseURL = [System.Environment]::GetEnvironmentVariable("BASE_URL")
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            $url = curl.exe -Ls -o NUL -w "%{url_effective}" $($using:baseURL)/latest-${_}
+            $base_url = $($using:baseURL)
+            $url = curl.exe -Ls -o NUL -w "%{url_effective}" ${base_url}latest-${_}
             echo $url
             if ($url -match "v(\d+\.\d+\.\d+)") {
+              echo $matches
               $version = $matches[1]
               echo $version
               try {
