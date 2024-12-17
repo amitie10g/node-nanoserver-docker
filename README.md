@@ -7,8 +7,8 @@ This project brings [Node.js](https://nodejs.org/) (version 6 to 22) on [Microso
 
 ## Tags
 
-* ``23`` ``23-ltsc2022``
-* ``latest`` ``jod`` ``jod-ltsc2022``  ``22`` ``22-ltsc2022``
+* ``latest`` ``23`` ``23-ltsc2022``
+* ``jod`` ``jod-ltsc2022``  ``22`` ``22-ltsc2022``
 * ``iron`` ``iron-ltsc2022``  ``20`` ``20-ltsc2022``
 * ``hydrogen`` ``hydrogen-ltsc2022``  ``18`` ``18-ltsc2022``
 * ``gallium`` ``gallium-ltsc2022``  ``16`` ``16-ltsc2022``
