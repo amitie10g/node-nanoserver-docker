@@ -57,6 +57,7 @@ jobs:
       fail-fast: false
       matrix:
         winver:
+          - ltsc2025
           - ltsc2022
           - ltsc2019
           - 20H2
@@ -65,7 +66,7 @@ jobs:
           - 1809
           - 1803
           - 1709
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
       - name: Checkout
         uses: actions/checkout@v4
