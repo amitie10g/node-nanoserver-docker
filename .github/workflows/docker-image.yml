@@ -47,10 +47,7 @@ jobs:
         name: NodeJS
         retention-days: 1
         path: |
-          node*
-          !*-win-x64
-          !*.zip
-
+          node-*-win-x64/
   Build:
     needs: Download
     strategy:
