@@ -31,7 +31,7 @@ jobs:
           {
             base_url=$(curl -kLs -o /dev/null -w %{url_effective} "${{ env.BASE_URL }}/latest-v${version}.x")
             minor_version=$(basename "${base_url}")
-            curl --fail -O ${base_url}node-${minor_version}-win-x64.zip
+            curl -C --fail -O ${base_url}node-${minor_version}-win-x64.zip
             if [ -f "node-${minor_version}-win-x64.zip" ]; then
               unzip node-${minor_version}-win-x64.zip
               mv node-${minor_version}-win-x64/ node-${minor_version}
