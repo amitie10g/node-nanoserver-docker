@@ -34,11 +34,9 @@ jobs:
             curl -C - --fail -O ${base_url}node-${minor_version}-win-x64.zip
             if [ -f "node-${minor_version}-win-x64.zip" ]; then
               unzip node-${minor_version}-win-x64.zip
-              mv node-${minor_version}-win-x64/ node-${minor_version}
             fi
           } &
         done
-
         wait
 
     - name: Upload to Artifacts
