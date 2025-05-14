@@ -1,3 +1,4 @@
+LABEL org.opencontainers.image.description Node.js on Windows Nano Server
 ARG  BASE_IMG=windows/nanoserver
 ARG  CONT_VER=ltsc2022
 FROM mcr.microsoft.com/${BASE_IMG}:${CONT_VER}
