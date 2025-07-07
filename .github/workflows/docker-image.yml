@@ -82,6 +82,7 @@ jobs:
 
       - name: Build
         run: |
+          dir NodeJS
           $directories = Get-ChildItem -Path NodeJS -Directory
           $versions = @()
           $regex = [regex]"\d+\.\d+\.\d+"
@@ -90,7 +91,7 @@ jobs:
               $versions += $matches[0]
             }
           }
-          $versions | ForEach-Object -Parallel {
+          $versions | ForEach-Object {
             $version = $_
             $major, $minor, $patch = $_ -split '\.'
             $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${major}-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${major}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }}"
@@ -101,7 +102,7 @@ jobs:
               }
             } 
             cmd /c "docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${version} --build-arg CONT_VER=${{ matrix.winver }} ."
-          } -ThrottleLimit 4
+          }
 
       - name: Tag elements
         run: |
