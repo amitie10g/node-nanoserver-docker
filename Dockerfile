@@ -5,6 +5,7 @@ ARG NODE_VER=22.14.0
 FROM mcr.microsoft.com/${BASE_IMG}:${CONT_VER}
 
 ARG NODE_VER
+RUN echo NodeJS/node-v${NODE_VER}-win-x64 C:\\node
 COPY NodeJS/node-v${NODE_VER}-win-x64 C:\\node
 
 USER ContainerAdministrator
