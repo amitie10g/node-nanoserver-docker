@@ -74,7 +74,7 @@ jobs:
           $baseURL = "[System.Environment]::GetEnvironmentVariable('BASE_URL')"
           Write-Host $baseURL
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
-            $url = [System.Environment]::GetEnvironmentVariable("BASE_URL")/latest-${_}/SHASUMS256.txt
+            $url = "[System.Environment]::GetEnvironmentVariable('BASE_URL')/latest-${_}/SHASUMS256.txt"
             $response = Invoke-WebRequest -Uri $url -UseBasicParsing
             $content = $response.Content
             $version = ($content | Select-String -Pattern "node-v(\d+\.\d+\.\d+)\.tar\.gz" | ForEach-Object {
