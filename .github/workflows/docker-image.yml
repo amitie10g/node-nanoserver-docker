@@ -51,7 +51,7 @@ jobs:
         - ltsc2022
         - ltsc2019
     steps:
-      - name: Test Node.js ${{ matrix.version }}
+      - name: Build
         shell: pwsh
         run: |
           $parts = "${{ matrix.version }}" -split '\.'
