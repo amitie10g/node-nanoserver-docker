@@ -8,7 +8,7 @@ on:
 env:
   BASE_URL: "https://nodejs.org/dist"
   FIRST_VERSION: 4
-  LATEST_VERSION: 23
+  LATEST_VERSION: 24
   NODE_VERSIONS_ELEMENTS: >-
     argon
     boron
@@ -22,83 +22,52 @@ env:
     jod
 
 jobs:
-  Download:
+  get-versions:
     runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.set-output.outputs.versions }}
     steps:
-    - name: Download
-      run: |
-        for version in $(seq ${{ env.FIRST_VERSION }} ${{ env.LATEST_VERSION }}); do
-          {
-            base_url=$(curl -kLs -o /dev/null -w %{url_effective} "${{ env.BASE_URL }}/latest-v${version}.x")
-            minor_version=$(basename "${base_url}")
-            echo $minor_version
-            curl -C - --fail -O ${base_url}node-${minor_version}-win-x64.zip
-            if [ -f "node-${minor_version}-win-x64.zip" ]; then
-              unzip node-${minor_version}-win-x64.zip
-            fi
-          } &
-        done
-        wait
-
-    - name: Upload to Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: NodeJS
-        retention-days: 1
-        path: |
-          node-*-win-x64/
-  Build:
-    needs: Download
-    strategy:
-      fail-fast: false
-      matrix:
-        winver:
-          - ltsc2025
-          - ltsc2022
-          - ltsc2019
-    runs-on: windows-2022
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-
-      - name: Debug
-        run: dir NodeJS
-      - name: Build
+      - name: Get minor version
+        id: set-output
         run: |
-          $directories = Get-ChildItem -Path NodeJS -Directory
-          $versions = @()
-          $regex = [regex]"\d+\.\d+\.\d+"
-          foreach ($dir in $directories) {
-            if ($dir.Name -match $regex) {
-              $versions += $matches[0]
-            }
+          versions=()
+          for major in $(seq ${{ env.FIRST_VERSION }} ${{ env.LATEST_VERSION }}); do
+            url="https://nodejs.org/dist/latest-v$major.x/SHASUMS256.txt"
+            minor=$(curl -s "$url" | grep -oP 'node-v\K[0-9]+\.[0-9]+\.[0-9]+(?=\.tar\.gz)' | head -n 1)
+            versions+=("$minor")
+          done
+          output=$(printf '%s\n' "${versions[@]}" | jq -R . | jq -cs .)
+          echo "$output"
+          echo "versions=$output" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: get-versions
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        version: ${{ fromJson(needs.get-versions.outputs.versions) }}
+        winver:
+        - ltsc2025
+        - ltsc2022
+        - ltsc2019
+    steps:
+      - name: Test Node.js ${{ matrix.version }}
+        shell: pwsh
+        run: |
+          $parts = "${{ matrix.version }}" -split '\.'
+          $majorMinor = "$($parts[0]).$($parts[1])"
+          $major = $parts[0]
+          Write-Host $major
+          Write-Host $majorMinor
+          Write-Host ${{ matrix.version }}
+          $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }}-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$majorMinor-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$majorMinor-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$major-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$major-${{ matrix.winver }}"
+          if ("${{ matrix.winver }}" -eq "ltsc2025") {
+            $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$majorMinor -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$majorMinor -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$major -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$major"
           }
-          $versions | ForEach-Object {
-            $version = $_
-            $major, $minor, $patch = $_ -split '\.'
-            $TAGS = "-t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${major}-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${major}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }}"
-            if (${{ strategy.job-index }} -eq 0) {
-              $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${major} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${major} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}"
-              if ($major -eq [System.Environment]::GetEnvironmentVariable("LATEST_VERSION")) {
-                $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
-              }
-            }
-            cmd /c "docker build --isolation=hyperv ${TAGS} --build-arg NODE_VER=${version} --build-arg CONT_VER=${{ matrix.winver }} ."
+          if ($jobIndex -eq 0) {
+              $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
           }
+          Write-Host "docker build --isolation=hyperv $TAGS --build-arg NODE_VER=${{ matrix.version }} --build-arg CONT_VER=${{ matrix.winver }} ."
 
       - name: Tag elements
         run: |
@@ -109,14 +78,14 @@ jobs:
             if ($url -match "v(\d+\.\d+\.\d+)") {
               $version = $matches[1]
               try {
-                cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
-                cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
+                echo cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
+                echo cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
               } catch {
-                cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${version} ."
+                echo cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${version} ."
               }
               if (${{ strategy.job-index }} -eq 0) {
-                cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
-                cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
+                echo cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
+                echo cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
               }
             }
           } -ThrottleLimit 9
@@ -124,5 +93,5 @@ jobs:
       - name: Push
         run: |
           @("${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}", "ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}") | ForEach-Object -Parallel {
-            cmd /c "docker push $_ --all-tags"
+            echo cmd /c "docker push $_ --all-tags"
           }
