@@ -81,8 +81,9 @@ jobs:
                     return $matches[1]
                 }
             }) | Select-Object -First 1
-            Write-Host "Matrix: ${{ matrix.version }}"
-            Write-Host "Found:  $version ($_)"
+            if (${{ matrix.version }} -eq $version) {
+              Write-Host "Found:  $version ($_)"
+            }
 
             #if ($url -match "v(\d+\.\d+\.\d+)") {
             #  $version = $matches[1]
