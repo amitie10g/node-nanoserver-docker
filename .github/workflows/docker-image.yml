@@ -42,7 +42,7 @@ jobs:
 
   build:
     needs: get-versions
-    runs-on: windows-latest
+    runs-on: windows-2025
     strategy:
       matrix:
         version: ${{ fromJson(needs.get-versions.outputs.versions) }}
