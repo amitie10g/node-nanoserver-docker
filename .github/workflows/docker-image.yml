@@ -44,6 +44,7 @@ jobs:
     needs: get-versions
     runs-on: windows-2025
     strategy:
+      fail-fast: false
       matrix:
         version: ${{ fromJson(needs.get-versions.outputs.versions) }}
         winver:
