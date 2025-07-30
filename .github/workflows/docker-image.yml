@@ -82,7 +82,7 @@ jobs:
                 }
             }) | Select-Object -First 1
             Write-Host $version
-            if (${{ matrix.version }} -eq $version) {
+            if ("${{ matrix.version }}" -eq "$version") {
               Write-Host "Found: $version ($_)"
             } else {
               Write-Host "Not found: $version ($_)"
