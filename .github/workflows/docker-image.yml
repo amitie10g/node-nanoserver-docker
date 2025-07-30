@@ -74,7 +74,6 @@ jobs:
           [System.Environment]::GetEnvironmentVariable("NODE_VERSIONS_ELEMENTS") -split ' ' | ForEach-Object -Parallel {
             $baseURL = [System.Environment]::GetEnvironmentVariable("BASE_URL")
             $url = "$baseURL/latest-${_}/SHASUMS256.txt"
-            Write-Host $url
             $response = Invoke-WebRequest -Uri $url -UseBasicParsing
             $content = $response.Content
             $version = ($content | Select-String -Pattern "node-v(\d+\.\d+\.\d+)\.tar\.gz" | ForEach-Object {
@@ -84,7 +83,7 @@ jobs:
             }) | Select-Object -First 1
 
             if (${{ matrix.version }} -eq $version) {
-              Write-Output "Versión encontrada: $version"
+              Write-Host "Versión encontrada: $version"
             }
 
             #if ($url -match "v(\d+\.\d+\.\d+)") {
