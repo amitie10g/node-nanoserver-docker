@@ -57,9 +57,6 @@ jobs:
           $parts = "${{ matrix.version }}" -split '\.'
           $majorMinor = "$($parts[0]).$($parts[1])"
           $major = $parts[0]
-          Write-Host $major
-          Write-Host $majorMinor
-          Write-Host ${{ matrix.version }}
           $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }}-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$majorMinor-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$majorMinor-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$major-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$major-${{ matrix.winver }}"
           if ("${{ matrix.winver }}" -eq "ltsc2025") {
             $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$majorMinor -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$majorMinor -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$major -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$major"
@@ -67,7 +64,7 @@ jobs:
           if ($jobIndex -eq 0) {
               $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
           }
-          Write-Host "docker build --isolation=hyperv $TAGS --build-arg NODE_VER=${{ matrix.version }} --build-arg CONT_VER=${{ matrix.winver }} ."
+          cmd /c "docker build --isolation=hyperv $TAGS --build-arg NODE_VER=${{ matrix.version }} --build-arg CONT_VER=${{ matrix.winver }} ."
 
       - name: Tag elements
         run: |
@@ -83,14 +80,14 @@ jobs:
             }) | Select-Object -First 1
             if ("${{ matrix.version }}" -eq "$version") {
               try {
-                Write-Host "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
-                Write-Host "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
+                cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
+                cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${version}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }}"
               } catch {
-                Write-Host "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${version} ."
+                cmd /c "docker build --isolation hyperv -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} --build-arg NODE_VER=${version} ."
               }
               if (${{ strategy.job-index }} -eq 0) {
-                Write-Host "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
-                Write-Host "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
+                cmd /c "docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${_}"
+                cmd /c "docker tag ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}-${{ matrix.winver }} ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${_}"
               }
             }
           }
