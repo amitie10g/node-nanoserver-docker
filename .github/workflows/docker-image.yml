@@ -12,7 +12,7 @@ permissions:
 
 env:
   BASE_URL: "https://nodejs.org/dist"
-  FIRST_VERSION: 6
+  FIRST_VERSION: 4
   LATEST_VERSION: 24
   NODE_VERSIONS_ELEMENTS: >-
     argon
@@ -48,6 +48,7 @@ jobs:
   build:
     needs: get-versions
     runs-on: windows-2025
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
