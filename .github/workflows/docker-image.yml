@@ -98,5 +98,5 @@ jobs:
       - name: Push
         run: |
           @("${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}", "ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}") | ForEach-Object -Parallel {
-            echo cmd /c "docker push $_ --all-tags"
+            cmd /c "docker push $_ --all-tags"
           }
