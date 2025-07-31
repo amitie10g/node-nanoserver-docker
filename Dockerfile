@@ -8,16 +8,17 @@ ARG BASE_URL
 ARG NODE_VER
 
 SHELL ["powershell", "-Command"]
-RUN curl.exe -C - --fail -O "$env:BASE_URL/v$env:NODE_VER/node-v$env:NODE_VER-win-x64.zip" ; \
-    Expand-Archive "node-v$env:NODE_VER-win-x64.zip" ; \
-    Move-Item -Path "C:\\node-v$env:NODE_VER-win-x64\\node-v$env:NODE_VER-win-x64" -Destination "C:\node"
+RUN curl.exe -C - --fail -O "$env:BASE_URL/v$env:NODE_VER/node-v$env:NODE_VER-win-x64.zip"
+RUN tar xf "node-v$env:NODE_VER-win-x64.zip"
 
 FROM mcr.microsoft.com/${BASE_IMG}:${CONT_VER}
 LABEL \
   org.opencontainers.image.title="Node.js Base Image" \
   org.opencontainers.image.description="Node.js on Windows Nano Server"
 
-COPY --from=download C:\\node\ C:\\node
+ARG NODE_VER
+
+COPY --from=download C:\\node-v${NODE_VER}-win-x64\ C:\\node
 
 ENV PATH="C:\\node;${PATH}"
 
