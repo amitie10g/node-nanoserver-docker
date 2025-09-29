@@ -3,7 +3,7 @@
 
 <p align=center><img src="https://github.com/Amitie10g/node-nanoserver-docker/assets/2096562/d2ac73e9-d71d-47a7-988a-d73358c411cc" alt="Node.js logo" style="text-align:center;margin:auto"></p>
 
-This project brings [Node.js](https://nodejs.org/) (version 4 to 22) on [Microsoft Windows Nano Server](https://hub.docker.com/_/microsoft-windows-nanoserver) base image.
+This project brings [Node.js](https://nodejs.org/) (version 4 to 24; argon to jod) on [Microsoft Windows Nano Server](https://hub.docker.com/_/microsoft-windows-nanoserver) base image.
 
 ## Tags
 
