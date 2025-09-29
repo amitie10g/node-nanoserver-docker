@@ -37,7 +37,7 @@ If you need to install system-wide software, you need to set `USER` as `Containe
 If you want to use it within GitHub Actions, prefer the GitHub Container registry: `ghcr.io/amitie10g/node-nanoserver`
 
 ## Building
-Containers for this project has been built using [GitHub Actions](https://github.com/features/actions) for automated weekly builds from 4 to 22 under Windows Nano Server ltsc2022 and ltsc2019. GitHub provides runners only for Windows Server 2022 (ltsc2022) and Server 2019 (ltsc2019) and no [hyperv isolation](https://docs.docker.com/engine/reference/commandline/build/#isolation) is supported. If you need other versions of Windows, follow this instructions.
+Containers for this project has been built using [GitHub Actions](https://github.com/features/actions) for automated weekly builds from 4 to 24 under Windows Nano Server ltsc2025, ltsc2022 and ltsc2019. If you need other versions of Windows, follow this instructions.
 
     docker build -t <tag> --build-arg NODE_VER=<node version> --build-arg BASE_IMG=<base image> --build-arg CONT_VER=<container version> .
 Where,
