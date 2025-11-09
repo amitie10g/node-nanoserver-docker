@@ -13,7 +13,7 @@ permissions:
 env:
   BASE_URL: "https://nodejs.org/dist"
   FIRST_VERSION: 4
-  LATEST_VERSION: 24
+  LATEST_VERSION: 25
   NODE_VERSIONS_ELEMENTS: >-
     argon
     boron
@@ -25,6 +25,7 @@ env:
     hydrogen
     iron
     jod
+    kripton
 
 jobs:
   get-versions:
