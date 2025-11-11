@@ -5,6 +5,8 @@
 
 This project brings [Node.js](https://nodejs.org/) (version 4 to 25; argon to krypton) on [Microsoft Windows Nano Server](https://hub.docker.com/_/microsoft-windows-nanoserver) base image.
 
+**Note:** Version 5 is not available due to unavailability of the upstream.
+
 ## Tags
 
 * ``latest`` ``25`` ``25-ltsc2025``
