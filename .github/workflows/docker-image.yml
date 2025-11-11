@@ -81,7 +81,7 @@ jobs:
           $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }}-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }}-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$majorMinor-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$majorMinor-${{ matrix.winver }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$major-${{ matrix.winver }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$major-${{ matrix.winver }}"
           if ("${{ matrix.winver }}" -eq "ltsc2025") {
             $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }} -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${{ matrix.version }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$majorMinor -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$majorMinor -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:$major -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:$major"
-            if (${{ matrix.version }} -eq ${{ env.LATEST_VERSION }}) {
+            if ("${{ matrix.version }}" -eq "${{ env.LATEST_VERSION }}") {
                 $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:latest -t ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest"
             }
           }
