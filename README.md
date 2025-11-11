@@ -7,17 +7,18 @@ This project brings [Node.js](https://nodejs.org/) (version 4 to 24; argon to jo
 
 ## Tags
 
-* ``latest`` ``23`` ``23-ltsc2022``
-* ``jod`` ``jod-ltsc2022``  ``22`` ``22-ltsc2022``
-* ``iron`` ``iron-ltsc2022``  ``20`` ``20-ltsc2022``
-* ``hydrogen`` ``hydrogen-ltsc2022``  ``18`` ``18-ltsc2022``
-* ``gallium`` ``gallium-ltsc2022``  ``16`` ``16-ltsc2022``
-* ``fermium`` ``fermium-ltsc2022``  ``14`` ``14-ltsc2022``
-* ``erbium`` ``erbium-ltsc2022``  ``12`` ``12-ltsc2022``
-* ``dubnium`` ``dubnium-ltsc2022``  ``10`` ``10-ltsc2022``
-* ``carbon`` ``carbon-ltsc2022``  ``8`` ``8-ltsc2022``
-* ``boron`` ``boron-ltsc2022``  ``6`` ``6-ltsc2022``
-* ``argon`` ``argon-ltsc2022``  ``4`` ``4-ltsc2022``
+* ``latest`` ``25`` ``25-ltsc2025``
+* ``krypton`` ``24`` ``24-ltsc2025``
+* ``jod`` ``jod-ltsc2025``  ``22`` ``22-ltsc2025``
+* ``iron`` ``iron-ltsc2025``  ``20`` ``20-ltsc2025``
+* ``hydrogen`` ``hydrogen-ltsc2025``  ``18`` ``18-ltsc2025``
+* ``gallium`` ``gallium-ltsc2025``  ``16`` ``16-ltsc2025``
+* ``fermium`` ``fermium-ltsc2025``  ``14`` ``14-ltsc2025``
+* ``erbium`` ``erbium-ltsc2025``  ``12`` ``12-ltsc2025``
+* ``dubnium`` ``dubnium-ltsc2025``  ``10`` ``10-ltsc2025``
+* ``carbon`` ``carbon-ltsc2025``  ``8`` ``8-ltsc2025``
+* ``boron`` ``boron-ltsc2025``  ``6`` ``6-ltsc2025``
+* ``argon`` ``argon-ltsc2025``  ``4`` ``4-ltsc2025``
 
 [Full list of tags avilable](https://github.com/amitie10g/node-nanoserver-docker/pkgs/container/node-nanoserver) at both GitHub Container registry and [Docker Hub Container registry](https://hub.docker.com/r/amitie10g/node-nanoserver).
 
